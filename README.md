@@ -1,113 +1,43 @@
-# Employment Classification in India | Machine Learning
+<div align="center">
 
-**A multiclass classification study using the Periodic Labour Force Survey (PLFS), 2020–21**
+<img src="assets/project-overview.svg" alt="Employment Classification: 313,759 records, 13 classifiers, 86.12% accuracy and 85.64% macro-F1" width="100%">
 
-Data Mining and Knowledge Discovery · DMS672 · IIT Kanpur
+![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=flat-square&logo=pandas&logoColor=white)
+![Scikit-learn](https://img.shields.io/badge/Scikit--learn-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)
+![Jupyter](https://img.shields.io/badge/Jupyter-F37626?style=flat-square&logo=jupyter&logoColor=white)
 
-[Analysis Notebook](employment_classification.ipynb) · [Project Report](project_report.pdf) · [Dataset](data/)
+**DMS672 · Data Mining and Knowledge Discovery · IIT Kanpur**
+
+[Explore notebook](employment_classification.ipynb) · [Read report](project_report.pdf) · [Access dataset](data/) · [Quick start](#quick-start)
+
+[Overview](#project-overview) · [Results](#model-performance) · [Workflow](#methodology) · [Dataset](#dataset--insights)
+
+</div>
 
 ---
 
-## 1. Project Overview
+## Project overview
 
-India's workforce includes self-employed individuals, regular salaried employees, and casual labourers. This project applies machine learning to classify these employment arrangements using demographic, occupational, socioeconomic and household-level survey information.
+**Can machine learning distinguish self-employed, salaried and casual workers using occupational and socioeconomic survey data?**
 
-The objective is to identify the factors associated with employment type, compare classification algorithms, and develop a robust model that performs well across all three classes, including the underrepresented casual-labour class.
+This project transforms India's Periodic Labour Force Survey (PLFS), July 2020–June 2021, into a multiclass classification problem. It integrates **923,985 raw person records**, selects **19 predictors**, and benchmarks **13 classifiers** on unseen households.
 
-| Raw survey records | Modelling records | Predictors | Models evaluated |
-| :---: | :---: | :---: | :---: |
-| **923,985** | **313,759** | **19** | **13** |
-
-| Best model | Validation accuracy | Macro-F1 |
-| :---: | :---: | :---: |
-| **Soft-voting ensemble** | **86.12%** | **85.64%** |
-
-## 2. Dataset
-
-**Source:** Periodic Labour Force Survey (PLFS), India, July 2020 – June 2021.
-
-The analysis integrates household and individual survey files from first visits and revisits. Employed respondents aged 15 and above are selected, and their Current Weekly Status (CWS) is mapped into three target categories.
-
-| Target class | Observations | Distribution |
-| :--- | ---: | ---: |
-| Self-employed | 149,584 | 47.7% |
-| Regular salaried | 119,019 | 37.9% |
-| Casual labour | 45,156 | 14.4% |
-| **Total** | **313,759** | **100.0%** |
-
-Counts represent survey observations across visits, not necessarily unique individuals.
-
-## 3. End-to-End Methodology
-
-```mermaid
-flowchart TD
-    A["Raw PLFS data · 923,985 records"] --> B["Integrate household and individual files"]
-    B --> C["Filter eligible workers and construct target"]
-    C --> D["Exploratory data analysis"]
-    D --> E["Feature selection · 19 predictors"]
-    E --> F["Household-level training and validation split"]
-    F --> G["Fit preprocessing on training data"]
-    G --> H["Train and compare 13 classifiers"]
-    H --> I["Evaluate accuracy, macro-F1 and class recall"]
-    I --> J["Best model · Soft-voting ensemble"]
-    classDef source fill:#dbeafe,stroke:#2563eb,color:#172554
-    classDef process fill:#f1f5f9,stroke:#64748b,color:#0f172a
-    classDef result fill:#dcfce7,stroke:#16a34a,color:#14532d
-    class A source
-    class B,C,D,E,F,G,H,I process
-    class J result
-```
-
-## 4. Exploratory Data Analysis
-
-The analysis examines the relationship between employment type and worker characteristics, including occupation, industry, education, working hours, location and household expenditure.
-
-| Finding | Interpretation |
+| Technical challenge | Approach |
 | :--- | :--- |
-| 81.0% of agricultural workers were self-employed | Employment arrangements vary substantially across industries. |
-| 73.0% of construction workers were casual labourers | Industry provides useful information for classification. |
-| Industry and occupation showed the strongest associations | Occupational features are important predictors. |
-| Casual labour represents only 14.4% of observations | Accuracy alone is insufficient for evaluating model quality. |
+| Repeated household observations | Household-level validation split |
+| Target leakage | Exclusion of earnings and target-defining information |
+| Imbalanced employment classes | Macro-F1 and class-wise recall for model comparison |
+| Model selection | Comparison of individual classifiers and probability-based ensemble |
 
-These findings describe the unweighted survey sample and do not establish causal relationships.
+## Model performance
 
-## 5. Data Preprocessing & Feature Engineering
+<img src="assets/model-performance.svg" alt="Macro-F1 benchmark for six classifiers, led by soft voting at 85.64%" width="100%">
 
-- Integrate first-visit and revisit household and person records.
-- Filter the eligible working population and construct the three-class target.
-- Select 19 predictors covering occupational, demographic and household information.
-- Prepare numerical and categorical features for machine learning.
-- Exclude earnings, target-defining information and other leakage-prone fields from model inputs.
-- Keep all records from a household on the same side of the training/validation split.
+The **soft-voting ensemble** achieved the best overall result, improving macro-F1 by **6.37 percentage points** over logistic regression. Histogram gradient boosting achieved the highest casual-labour recall at **87.62%**.
 
-The household-level split is particularly important because more than 43,000 households appear in both first-visit and revisit data. It reduces the risk of evaluating a model on households it has already seen during training.
-
-## 6. Machine Learning Models
-
-A total of 13 classifiers were evaluated, covering linear, tree-based, neural network and ensemble approaches.
-
-Selected models include Logistic Regression, Pruned Decision Tree, Random Forest, Histogram Gradient Boosting, Multilayer Perceptron and Soft-Voting Ensemble.
-
-### Ensemble architecture
-
-```mermaid
-flowchart LR
-    A["Processed features"] --> B["Random Forest"]
-    A --> C["Histogram Gradient Boosting"]
-    A --> D["Multilayer Perceptron"]
-    B --> E["Average class probabilities"]
-    C --> E
-    D --> E
-    E --> F["Predicted employment class"]
-    classDef result fill:#dcfce7,stroke:#16a34a,color:#14532d
-    class F result
-```
-
-Soft voting combines the predicted class probabilities of the three component models and selects the class with the highest average probability.
-
-## 7. Model Evaluation & Results
-
-Models are compared on **63,611 held-out validation observations** using accuracy, macro-F1 and class-wise recall. Macro-F1 is the primary comparison metric because it assigns equal importance to all three employment classes.
+<details>
+<summary><b>Expand detailed model comparison and error analysis</b></summary>
 
 | Model | Accuracy | Macro-F1 | Casual-labour recall |
 | :--- | ---: | ---: | ---: |
@@ -126,7 +56,85 @@ Models are compared on **63,611 held-out validation observations** using accurac
 
 For the full model comparison, confusion matrix and detailed methodology, see the [project report](project_report.pdf).
 
-## 8. Technology Stack
+</details>
+
+## Methodology
+
+```mermaid
+flowchart LR
+    A["PLFS raw data"] --> B["Join and filter"]
+    B --> C["EDA and features"]
+    C --> D["Household split"]
+    D --> E["Train 13 models"]
+    E --> F["Evaluate and select"]
+    classDef source fill:#dbeafe,stroke:#2563eb,color:#172554
+    classDef process fill:#f1f5f9,stroke:#64748b,color:#0f172a
+    classDef result fill:#ccfbf1,stroke:#0d9488,color:#134e4a
+    class A source
+    class B,C,D,E process
+    class F result
+```
+
+### Data preprocessing & feature engineering
+
+- Integrate first-visit and revisit household and person records.
+- Filter the eligible working population and construct the three-class target.
+- Select 19 predictors covering occupational, demographic and household information.
+- Prepare numerical and categorical features for machine learning.
+- Exclude earnings, target-defining information and other leakage-prone fields from model inputs.
+- Keep all records from a household on the same side of the training/validation split.
+
+The household-level split is particularly important because more than 43,000 households appear in both first-visit and revisit data. It reduces the risk of evaluating a model on households it has already seen during training.
+
+### Ensemble architecture
+
+```mermaid
+flowchart LR
+    A["Processed features"] --> B["Random Forest"]
+    A --> C["Histogram Gradient Boosting"]
+    A --> D["Multilayer Perceptron"]
+    B --> E["Average class probabilities"]
+    C --> E
+    D --> E
+    E --> F["Predicted employment class"]
+    classDef result fill:#dcfce7,stroke:#16a34a,color:#14532d
+    class F result
+```
+
+Soft voting combines the predicted class probabilities of the three component models and selects the class with the highest average probability.
+
+## Dataset & insights
+
+<img src="assets/class-distribution.svg" alt="Target distribution: self-employed 47.7%, regular salaried 37.9%, casual labour 14.4%" width="100%">
+
+**Source:** Periodic Labour Force Survey (PLFS), India, July 2020–June 2021.
+
+The analysis integrates household and individual survey files from first visits and revisits, retaining employed respondents aged 15 and above. Current Weekly Status defines the three target classes. Counts represent observations across visits, not necessarily unique individuals.
+
+### What the data reveals
+
+| Key finding | Interpretation |
+| :--- | :--- |
+| **81.0%** of agricultural workers were self-employed | Employment arrangements vary across industries. |
+| **73.0%** of construction workers were casual labourers | Industry provides useful classification information. |
+| Industry and occupation had the strongest associations | Occupational features are important predictors. |
+| Only **14.4%** of observations were casual labour | Accuracy alone is insufficient. |
+
+These findings describe the unweighted sample and do not establish causality.
+
+<details>
+<summary><b>Expand exact class counts</b></summary>
+
+| Target class | Observations | Distribution |
+| :--- | ---: | ---: |
+| Self-employed | 149,584 | 47.7% |
+| Regular salaried | 119,019 | 37.9% |
+| Casual labour | 45,156 | 14.4% |
+| **Total** | **313,759** | **100.0%** |
+
+</details>
+
+## Technology stack
 
 | Area | Tools |
 | :--- | :--- |
@@ -137,18 +145,19 @@ For the full model comparison, confusion matrix and detailed methodology, see th
 | Machine learning | Scikit-learn |
 | Development | Jupyter Notebook |
 
-## 9. Repository Structure
+## Repository structure
 
 ```text
 DATA_MINING_PROJECT/
 ├── README.md
 ├── employment_classification.ipynb
 ├── project_report.pdf
+├── assets/                  # Project visuals (SVG)
 └── data/
     └── plfs.zip.part-*    # Seven parts of the survey archive
 ```
 
-## 10. How to Run
+## Quick start
 
 Clone the repository:
 
@@ -193,8 +202,16 @@ DATA_DIR = "CSV_Unit_level_data_PLFS_July2020_June2021"
 
 Run the cells in sequence to reproduce the analysis and generate `plfs_validation_predictions.csv`.
 
-## 11. Limitations & Future Scope
+## Limitations & future scope
 
 - The model classifies existing employment arrangements using information about the current job; it does not forecast future employment.
 - The reported results are based on the unweighted PLFS 2020–21 sample.
 - Generalization to other survey years and nationally weighted evaluation remain to be investigated.
+
+---
+
+<div align="center">
+
+[Notebook](employment_classification.ipynb) · [Technical report](project_report.pdf) · [Back to overview](#project-overview)
+
+</div>
